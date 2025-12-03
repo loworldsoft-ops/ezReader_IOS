@@ -13,6 +13,8 @@
 		1A0000080000000000000001 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A0000070000000000000001 /* Preview Assets.xcassets */; };
 		8133921B2EE04BBB004210FA /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 8133921A2EE04BBB004210FA /* GoogleSignIn */; };
 		8133921D2EE04BBB004210FA /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8133921C2EE04BBB004210FA /* GoogleSignInSwift */; };
+		8133921F2EE05A10004210FA /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 8133921E2EE05A10004210FA /* GoogleSignIn */; };
+		813392212EE05A10004210FA /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 813392202EE05A10004210FA /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,8 @@
 			files = (
 				8133921B2EE04BBB004210FA /* GoogleSignIn in Frameworks */,
 				8133921D2EE04BBB004210FA /* GoogleSignInSwift in Frameworks */,
+				8133921F2EE05A10004210FA /* GoogleSignIn in Frameworks */,
+				813392212EE05A10004210FA /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,7 +284,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"ezReader_IOS/Preview Content\"";
 				DEVELOPMENT_TEAM = 7VQWVU4CTC;
 				ENABLE_PREVIEWS = YES;
@@ -312,7 +316,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"ezReader_IOS/Preview Content\"";
 				DEVELOPMENT_TEAM = 7VQWVU4CTC;
 				ENABLE_PREVIEWS = YES;
@@ -378,6 +382,16 @@
 			productName = GoogleSignIn;
 		};
 		8133921C2EE04BBB004210FA /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 813392192EE04BBB004210FA /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		8133921E2EE05A10004210FA /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 813392192EE04BBB004210FA /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		813392202EE05A10004210FA /* GoogleSignInSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 813392192EE04BBB004210FA /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
