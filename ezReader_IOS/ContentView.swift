@@ -2,6 +2,43 @@ import SwiftUI
 import WebKit
 import GoogleSignIn
 
+// MARK: - WebViewManager
+class WebViewManager: ObservableObject {
+    @Published var webView: WKWebView?
+    
+    /// 웹페이지로 메시지 전송
+    func sendToWeb(type: String, data: [String: Any]) {
+        guard let webView = webView else {
+            print("⚠️ WebView가 초기화되지 않았습니다")
+            return
+        }
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: data)
+            let jsonString = String(data: jsonData, encoding: .utf8) ?? "{}"
+            
+            let script = """
+            if (window.onIOSMessage) {
+                window.onIOSMessage('\(type)', \(jsonString));
+            } else {
+                console.warn('onIOSMessage 콜백이 정의되지 않았습니다');
+            }
+            """
+            
+            webView.evaluateJavaScript(script) { result, error in
+                if let error = error {
+                    print("❌ JS 실행 오류: \(error.localizedDescription)")
+                } else {
+                    print("✅ 웹으로 메시지 전송 완료: \(type)")
+                }
+            }
+        } catch {
+            print("❌ JSON 직렬화 오류: \(error)")
+        }
+    }
+}
+
+// MARK: - ContentView
 struct ContentView: View {
     @StateObject private var webViewManager = WebViewManager()
     
@@ -31,7 +68,14 @@ struct IOSWebView: UIViewRepresentable {
         
         manager.webView = webView
         
-        let url = URL(string: "https://loworldsoft-ops.github.io/ezReader_Mobile_Page/")!
+        // 개발 모드: 로컬 네트워크 서버 사용
+        // let url = URL(string: "http://192.168.0.41:4101")!
+        
+        // 로컬호스트 테스트
+        // let url = URL(string: "http://localhost:4200")!
+        
+        // 프로덕션 모드: GitHub Pages 사용
+        let url = URL(string: "https://loworldsoft-ops.github.io/ezReader_Mobile_Page")!
         webView.load(URLRequest(url: url))
         
         return webView
@@ -104,11 +148,12 @@ struct IOSWebView: UIViewRepresentable {
                     return
                 }
                 
-                guard let user = result?.user,
-                      let token = user.accessToken.tokenString else {
-                    self?.sendError("Failed to get access token")
+                guard let user = result?.user else {
+                    self?.sendError("Failed to get user")
                     return
                 }
+                
+                let token = user.accessToken.tokenString
                 
                 print("✅ 토큰 획득: \(token)")
                 
