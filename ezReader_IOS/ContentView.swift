@@ -6,23 +6,20 @@ import GoogleSignIn
 enum WebViewLoadingMode: Identifiable, CaseIterable {
     case remote
     case localBundle
-    case localhost
     
     var id: String { title }
     
     var title: String {
         switch self {
-        case .remote: return "원격 서버 (GitHub Pages)"
-        case .localBundle: return "로컬 번들 (오프라인)"
-        case .localhost: return "개발 서버 (localhost)"
+        case .remote: return "개발 버전"
+        case .localBundle: return "iOS 배포 버전"
         }
     }
     
     var subtitle: String {
         switch self {
-        case .remote: return "https://loworldsoft-ops.github.io/ezReader_Mobile_Page"
-        case .localBundle: return "앱에 포함된 웹앱 사용"
-        case .localhost: return "http://localhost:4200"
+        case .remote: return "최신 개발 버전"
+        case .localBundle: return "오프라인 사용 가능"
         }
     }
     
@@ -30,7 +27,6 @@ enum WebViewLoadingMode: Identifiable, CaseIterable {
         switch self {
         case .remote: return "globe"
         case .localBundle: return "internaldrive"
-        case .localhost: return "hammer"
         }
     }
     
@@ -40,8 +36,6 @@ enum WebViewLoadingMode: Identifiable, CaseIterable {
             return URL(string: "https://loworldsoft-ops.github.io/ezReader_Mobile_Page")
         case .localBundle:
             return nil // 로컬 번들은 별도 처리
-        case .localhost:
-            return URL(string: "http://localhost:4200")
         }
     }
 }
@@ -123,7 +117,6 @@ struct ContentView: View {
     private var lastMode: WebViewLoadingMode {
         switch lastSelectedModeRaw {
         case "localBundle": return .localBundle
-        case "localhost": return .localhost
         default: return .remote
         }
     }
@@ -148,7 +141,7 @@ struct ModeSelectionView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                     
-                    Text("웹앱 로딩 방식을 선택하세요")
+                    Text("개발테스트")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -166,14 +159,6 @@ struct ModeSelectionView: View {
                 .padding(.horizontal)
                 
                 Spacer()
-                
-                // 다음부터 묻지 않기 옵션
-                Toggle(isOn: $skipModeSelection) {
-                    Label("다음부터 자동으로 시작", systemImage: "arrow.right.circle")
-                        .font(.subheadline)
-                }
-                .padding(.horizontal, 30)
-                .padding(.bottom, 30)
             }
             .navigationBarHidden(true)
         }
@@ -184,7 +169,6 @@ struct ModeSelectionView: View {
         switch mode {
         case .remote: lastSelectedModeRaw = "remote"
         case .localBundle: lastSelectedModeRaw = "localBundle"
-        case .localhost: lastSelectedModeRaw = "localhost"
         }
         
         selectedMode = mode
@@ -232,7 +216,6 @@ struct ModeButton: View {
         switch mode {
         case .remote: return .blue
         case .localBundle: return .green
-        case .localhost: return .orange
         }
     }
 }
@@ -383,7 +366,7 @@ struct IOSWebView: UIViewRepresentable {
     
     private func loadWebView(_ webView: WKWebView) {
         switch loadingMode {
-        case .remote, .localhost:
+        case .remote:
             // 원격 URL 로딩
             if let url = loadingMode.url {
                 print("🌐 원격 URL 로딩: \(url.absoluteString)")
