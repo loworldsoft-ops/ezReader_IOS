@@ -3,6 +3,11 @@ import GoogleSignIn
 
 @main
 struct ezReaderApp: App {
+    
+    init() {
+        NSLog("🚀🚀🚀 [ezReader] 앱 초기화 시작")
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

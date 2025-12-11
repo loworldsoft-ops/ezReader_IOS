@@ -97,6 +97,9 @@ struct ContentView: View {
                     // 뒤로가기 시 선택 화면으로
                     selectedMode = nil
                 }
+                .onAppear {
+                    NSLog("🚀 [ezReader] 웹뷰 화면 로드 - 모드: \(mode.title)")
+                }
             } else if skipModeSelection {
                 // 자동 시작 모드
                 WebViewScreen(manager: webViewManager, mode: lastMode) {
@@ -241,11 +244,41 @@ struct WebViewScreen: View {
     let onBack: () -> Void
     
     @State private var showingBackAlert = false
+    @State private var errorMessage: String?
+    
+    init(manager: WebViewManager, mode: WebViewLoadingMode, onBack: @escaping () -> Void) {
+        self.manager = manager
+        self.mode = mode
+        self.onBack = onBack
+        
+        // 로컬 번들 모드일 때 미리 체크
+        if mode == .localBundle {
+            if Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "webapp") == nil {
+                let bundlePath = Bundle.main.bundlePath
+                let errorMsg = """
+                ❌ 로컬 웹앱 파일을 찾을 수 없습니다.
+                
+                경로: webapp/index.html
+                Bundle: \(bundlePath)
+                
+                해결 방법:
+                1. Angular 프로젝트를 빌드했는지 확인
+                2. webapp 폴더가 Xcode 프로젝트에 추가되었는지 확인
+                3. webapp 폴더를 "Create folder references" (파란색 폴더)로 추가했는지 확인
+                """
+                self._errorMessage = State(initialValue: errorMsg)
+            }
+        }
+    }
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            IOSWebView(manager: manager, loadingMode: mode)
+            if let error = errorMessage {
+                ErrorView(message: error, mode: mode, onBack: onBack)
+            } else {
+                IOSWebView(manager: manager, loadingMode: mode)
                 .ignoresSafeArea()
+            }
             
             // 뒤로가기 버튼 (디버그용)
             #if DEBUG
@@ -268,6 +301,47 @@ struct WebViewScreen: View {
     }
 }
 
+// MARK: - 오류 화면
+struct ErrorView: View {
+    let message: String
+    let mode: WebViewLoadingMode
+    let onBack: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 60))
+                .foregroundColor(.red)
+            
+            Text("로딩 실패")
+                .font(.title)
+                .fontWeight(.bold)
+            
+            ScrollView {
+                Text(message)
+                    .font(.system(.body, design: .monospaced))
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(12)
+            }
+            .padding()
+            
+            Button(action: onBack) {
+                Label("모드 선택으로 돌아가기", systemImage: "arrow.left")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal)
+        }
+        .padding()
+    }
+}
+
 struct IOSWebView: UIViewRepresentable {
     @ObservedObject var manager: WebViewManager
     let loadingMode: WebViewLoadingMode
@@ -279,13 +353,25 @@ struct IOSWebView: UIViewRepresentable {
         // JavaScript 메시지 핸들러 등록
         contentController.add(context.coordinator, name: "iosHandler")
         
-        // 로컬 파일 접근 설정 (로컬 번들 모드에서 필요)
+        // 🔐 로컬 파일 접근 설정 (로컬 번들 모드에서 필수)
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        config.preferences.javaScriptEnabled = true
+        config.preferences.javaScriptCanOpenWindowsAutomatically = true
+        
+        // 🔓 로컬 리소스 접근 허용 (중요!)
+        config.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         
         config.userContentController = contentController
+        config.allowsInlineMediaPlayback = true
         
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
+        
+        // 🔍 Safari Web Inspector 활성화 & JavaScript 허용 (iOS 16.4+)
+        if #available(iOS 16.4, *) {
+            webView.isInspectable = true
+            webView.configuration.defaultWebpagePreferences.allowsContentJavaScript = true
+        }
         
         manager.webView = webView
         
@@ -311,28 +397,32 @@ struct IOSWebView: UIViewRepresentable {
     }
     
     private func loadLocalBundle(_ webView: WKWebView) {
+        NSLog("📍 [ezReader] loadLocalBundle 함수 시작")
+        
         // webapp 폴더 내의 index.html 찾기
         guard let resourceURL = Bundle.main.url(forResource: "index",
                                                  withExtension: "html",
                                                  subdirectory: "webapp") else {
-            print("❌ 로컬 웹앱을 찾을 수 없습니다: webapp/index.html")
-            print("📁 Bundle path: \(Bundle.main.bundlePath)")
-            
-            // 폴백: 원격 URL 로드
-            if let fallbackURL = WebViewLoadingMode.remote.url {
-                print("🔄 폴백: 원격 URL로 전환")
-                webView.load(URLRequest(url: fallbackURL))
-            }
+            NSLog("❌ [ezReader] webapp/index.html을 찾을 수 없습니다")
+            NSLog("📁 [ezReader] Bundle path: \(Bundle.main.bundlePath)")
             return
         }
         
-        // 상위 폴더 URL (에셋 접근을 위해 필요)
-        let folderURL = resourceURL.deletingLastPathComponent()
+        // HTML 내용 읽기
+        guard let htmlString = try? String(contentsOf: resourceURL, encoding: .utf8) else {
+            NSLog("❌ [ezReader] index.html 읽기 실패")
+            return
+        }
         
-        print("📦 로컬 번들 로딩: \(resourceURL.path)")
+        // baseURL을 webapp 폴더로 설정 (상대 경로 리소스 로드를 위해)
+        let baseURL = resourceURL.deletingLastPathComponent()
         
-        // allowingReadAccessTo: 해당 폴더의 모든 리소스에 접근 허용
-        webView.loadFileURL(resourceURL, allowingReadAccessTo: folderURL)
+        NSLog("✅ [ezReader] 로컬 번들 로딩")
+        NSLog("📁 [ezReader] HTML path: \(resourceURL.path)")
+        NSLog("🔗 [ezReader] Base URL: \(baseURL.path)")
+        
+        // ⚡ baseURL을 명시적으로 설정해서 로드
+        webView.loadHTMLString(htmlString, baseURL: baseURL)
     }
     
     func updateUIView(_ webView: WKWebView, context: Context) {}

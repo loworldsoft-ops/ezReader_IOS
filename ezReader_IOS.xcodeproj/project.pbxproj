@@ -15,6 +15,7 @@
 		8133921D2EE04BBB004210FA /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8133921C2EE04BBB004210FA /* GoogleSignInSwift */; };
 		8133921F2EE05A10004210FA /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 8133921E2EE05A10004210FA /* GoogleSignIn */; };
 		813392212EE05A10004210FA /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 813392202EE05A10004210FA /* GoogleSignInSwift */; };
+		81EAC6CD2EEAD09C00F7E7AD /* webapp in Resources */ = {isa = PBXBuildFile; fileRef = 81EAC6CB2EEACE9B00F7E7AD /* webapp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		1A0000070000000000000001 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1A0000090000000000000001 /* ezReader_IOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ezReader_IOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A00000A0000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		81EAC6CB2EEACE9B00F7E7AD /* webapp */ = {isa = PBXFileReference; lastKnownFileType = folder; name = webapp; path = ezReader_IOS/webapp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +46,7 @@
 		1A00000C0000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				81EAC6CB2EEACE9B00F7E7AD /* webapp */,
 				1A00000D0000000000000001 /* ezReader_IOS */,
 				1A00000E0000000000000001 /* Products */,
 			);
@@ -138,6 +141,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81EAC6CD2EEAD09C00F7E7AD /* webapp in Resources */,
 				1A0000080000000000000001 /* Preview Assets.xcassets in Resources */,
 				1A0000050000000000000001 /* Assets.xcassets in Resources */,
 			);
